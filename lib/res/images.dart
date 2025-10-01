@@ -1,4 +1,4 @@
 class MyImages {
-  static const String mlbsIconWithName =
-      "assets/f.png";
+  static const String shaqadef=
+      "assets/shaqadef.png";
 }

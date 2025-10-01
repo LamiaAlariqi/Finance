@@ -1,40 +1,79 @@
+import 'package:finance/res/sizes.dart';
 import 'package:flutter/material.dart';
 
-class CustomButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String text;
-  final Color backgroundColor;
+class CustomMaterialButton extends StatelessWidget {
+  final void Function()? onPressed;
+  final String title;
+  final double vertical;
+  final double horizontal;
+  final Color buttonColor;
   final Color textColor;
-  final double? verticalPadding;
-  final double width;
+  final Color borderColor;
+  final double borderWidth;
   final double height;
+  final double width;
+  final double? textsize;
+  final Icon? prefixIcon;
 
-  const CustomButton({
-    Key? key,
-    required this.onPressed,
-    required this.text,
-    required  this.backgroundColor,
-     required this.textColor,
-     required this.height,
-     required this.width,
-    this.verticalPadding,
-  }) : super(key: key);
+  const CustomMaterialButton({
+    super.key,
+    this.onPressed,
+    required this.title,
+    this.horizontal = 0,
+    required this.vertical,
+    required this.buttonColor,
+    required this.textColor,
+    required this.borderWidth,
+    required this.borderColor,
+    required this.height,
+    required this.width,
+    this.textsize,
+    this.prefixIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: width,
-      child: ElevatedButton(
-        
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: TextStyle(color: textColor),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(wScreen * .05),
+        border: Border.all(
+          color: borderColor,
+          width: borderWidth,
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 15),
+      ),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: MaterialButton(
+          color: buttonColor,
+          onPressed: onPressed,
+          padding: EdgeInsets.symmetric(
+            vertical: vertical,
+            horizontal: horizontal,
+          ),
+          elevation: hScreen * .005,
+          shape: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(wScreen * .05),
+            borderSide: BorderSide.none,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (prefixIcon != null) ...[
+                prefixIcon!,
+                SizedBox(width: wScreen * 0.02),
+              ],
+              Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: textsize ?? fSize * 1.1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

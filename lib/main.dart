@@ -31,11 +31,10 @@ class Finance extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         debugShowCheckedModeBanner: false,
-        theme: themeData(),
-       darkTheme: themeData(),
-       
+        theme:  AppThemeData.lightTheme(),
+        themeMode: ThemeMode.light,
         routes: routes,
-        initialRoute: MyRoutes.homeScreen,
+        initialRoute: MyRoutes.loginScreen,
          builder: (context, child) {
           return Directionality(
             textDirection: TextDirection.rtl,

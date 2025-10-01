@@ -1,3 +1,4 @@
+import 'package:finance/views/screens/bodies/login_Body.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatelessWidget {
@@ -5,6 +6,8 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      body: LoginBody(),
+    );
   }
 }
