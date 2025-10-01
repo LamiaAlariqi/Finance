@@ -10,7 +10,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
    return Scaffold(
-     appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.1), child: const AppBarBody(text: "بحث")),
+     appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.1), child: const AppBarBody(text: "الرئيسية")),
      body:Padding(
       padding: const EdgeInsets.all(16.0),
       child: HomeBody()

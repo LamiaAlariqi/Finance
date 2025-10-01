@@ -132,7 +132,7 @@ class _LoginBodyState extends State<LoginBody> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  Navigator.pushReplacementNamed(context, MyRoutes.homeScreen);
+                  Navigator.pushReplacementNamed(context, MyRoutes.mainScreen);
                 }
               },
               textsize: fSize * 0.9,

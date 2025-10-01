@@ -9,22 +9,14 @@ class AppBarBody extends StatelessWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       title: Padding(
-        padding: EdgeInsets.only(left: wScreen * 0.04),
+        padding: EdgeInsets.only(right: wScreen * 0.04),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
                Text(
               text,
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: TextStyle(fontSize: fSize*1.3),
             ),
-            InkWell(
-
-              child: Icon(Icons.notifications),
-              onTap: () {
-                // التعامل مع الضغط هنا
-              },
-            ),
-         
           ],
         ),
       ),

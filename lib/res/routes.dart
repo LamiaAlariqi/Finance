@@ -2,6 +2,7 @@ import 'package:finance/views/screens/Login.dart';
 import 'package:finance/views/screens/Sales.dart';
 import 'package:finance/views/screens/expenses.dart';
 import 'package:finance/views/screens/home.dart';
+import 'package:finance/views/screens/main_screen.dart';
 import 'package:finance/views/screens/receipts.dart';
 import 'package:finance/views/screens/reports.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ class MyRoutes {
   static const String reportsScreen="reportsScreen";
   static const String expenseScreen="expenseScreen";
   static const String salesScreen="salesScreen";
+  static const String mainScreen="mainScreen";
 
 }
 Map<String, Widget Function(BuildContext)> routes = {
@@ -21,6 +23,7 @@ Map<String, Widget Function(BuildContext)> routes = {
   MyRoutes.reportsScreen: (context) => const Reports(),
   MyRoutes.salesScreen: (context) => const Sales(),
   MyRoutes.expenseScreen: (context) => const Expenses(),
+  MyRoutes.mainScreen:(context)=>const MainScreen()
 
  
 };
