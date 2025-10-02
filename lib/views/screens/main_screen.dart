@@ -7,23 +7,24 @@ import 'package:finance/views/usedwidget/bottom_navigator.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex; 
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-  final PageController _pageController = PageController(initialPage: 0);
+  late int _currentIndex;
+  late PageController _pageController;
 
-  final List<Widget> _pages = [
-    const HomeScreen(),
-    const Sales(),
-    const Receipts(),
-    const Expenses(),
-    const Reports(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex; 
+    _pageController = PageController(initialPage: _currentIndex);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,7 +39,13 @@ class _MainScreenState extends State<MainScreen> {
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        children: _pages,
+        children: const [
+          HomeScreen(),
+          Sales(),
+          Receipts(),
+          Expenses(),
+          Reports(),
+        ],
       ),
       bottomNavigationBar: BottomNavigator(
         currentIndex: _currentIndex,

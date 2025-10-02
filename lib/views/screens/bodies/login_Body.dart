@@ -47,6 +47,7 @@ class _LoginBodyState extends State<LoginBody> {
             fontWeight: FontWeight.normal,
           ),
           Container(
+            
             margin: EdgeInsets.only(
               right: wScreen * 0.04,
               left: wScreen * 0.04,
@@ -82,7 +83,7 @@ class _LoginBodyState extends State<LoginBody> {
                     controller: emailController,
                     width: 0,
                     showBorder: false,
-                    fsize: fSize * 0.8,
+                    fontsize: fSize * 0.8,
                     onSaved: (value) {
                       print("البريد الإلكتروني: $value");
                     },
@@ -99,7 +100,7 @@ class _LoginBodyState extends State<LoginBody> {
                   ),
                   SizedBox(height: hScreen * 0.01),
                   CustomTextFormField(
-                    fsize: fSize * 0.8,
+                    fontsize: fSize * 0.8,
                     showBorder: false,
                     hintText: "كلمة المرور",
                     suffixIcon: Icons.password_outlined,

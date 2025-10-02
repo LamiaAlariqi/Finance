@@ -9,9 +9,9 @@ class Receipts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.1), child: const AppBarBody(text: "سندات القبض")),
+      appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.07), child: const AppBarBody(text: "سندات القبض")),
      body:Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding:EdgeInsets.all(hScreen*0.01),
       child: ReceiptsBody(),
     ));
   }

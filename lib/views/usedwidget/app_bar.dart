@@ -1,3 +1,4 @@
+import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -7,15 +8,17 @@ class AppBarBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false,
+       automaticallyImplyLeading: false,
+      //  backgroundColor: MyColors.kmainColor,
+      backgroundColor:  MyColors.kmainColor,
       title: Padding(
-        padding: EdgeInsets.only(right: wScreen * 0.04),
+        padding: EdgeInsets.only(right: wScreen * 0.05 ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
                Text(
               text,
-              style: TextStyle(fontSize: fSize*1.3),
+              style: TextStyle(fontSize: fSize*1.3,color: Colors.white),
             ),
           ],
         ),

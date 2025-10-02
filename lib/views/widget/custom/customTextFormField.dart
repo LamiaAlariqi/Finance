@@ -1,3 +1,4 @@
+import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,7 @@ class CustomTextFormField extends StatelessWidget {
     this.suffixIconColor = Colors.grey,
     this.textAlign,
     this.width,
-    this.fsize,
+    this.fontsize,
     this.showBorder = true, 
   });
 
@@ -35,7 +36,7 @@ class CustomTextFormField extends StatelessWidget {
   final void Function(String?)? onSaved;
   final Color suffixIconColor;
   final double? width;
-  final double? fsize;
+  final double? fontsize;
   final bool showBorder; 
 
   @override
@@ -52,7 +53,7 @@ class CustomTextFormField extends StatelessWidget {
               return "يجب أن يكون طول كلمة المرور 8 أحرف على الأقل";
             }
           } else {
-            // التحقق من صحة البريد الإلكتروني
+           
             if (keyboardType == TextInputType.emailAddress) {
               final RegExp emailRegex = RegExp(
                 r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$',
@@ -76,13 +77,18 @@ class CustomTextFormField extends StatelessWidget {
       readOnly: readOnly,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      style: TextStyle(   
+    fontSize: (fSize*0.8),
+    color: MyColors.appTextColorPrimary,
+    fontWeight: FontWeight.bold,
+  ),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
         labelText: hintText,
         labelStyle: TextStyle(
           color: Colors.grey,
-          fontSize: fsize ?? fSize * 1,
+          fontSize: fontsize ?? fSize * 1,
           fontWeight: FontWeight.bold,
         ),
         suffixIcon: Icon(

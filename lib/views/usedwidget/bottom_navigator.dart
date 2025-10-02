@@ -5,16 +5,12 @@ class BottomNavigator extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  BottomNavigator({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
+  BottomNavigator({super.key, required this.currentIndex, required this.onTap});
 
   final List<IconData> _icons = [
     Icons.home,
     Icons.point_of_sale,
-    Icons.assignment, 
+    Icons.assignment,
     Icons.receipt_long,
     Icons.assessment,
   ];
@@ -32,15 +28,19 @@ class BottomNavigator extends StatelessWidget {
     double wScreen = MediaQuery.of(context).size.width;
 
     return BottomNavigationBar(
+      backgroundColor: MyColors.kmainColor,
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.white70,
       items: List.generate(_icons.length, (index) {
         bool isSelected = currentIndex == index;
+
         return BottomNavigationBarItem(
           icon: Icon(
             _icons[index],
-            color: isSelected ? MyColors.kmainColor : MyColors.appTextColorPrimary,
+            color: isSelected ? Colors.white : Colors.white70,
             size: isSelected ? wScreen * 0.06 : wScreen * 0.045,
           ),
           label: _labels[index],
