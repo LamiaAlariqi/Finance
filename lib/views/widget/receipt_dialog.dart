@@ -148,7 +148,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                 ),
                 SizedBox(height: hScreen * 0.02),
 
-                // ===== اسم العميل =====
+                
                 CustomTextFormField(
                   hintText: "اسم العميل",
                   fontsize: fSize*0.85,

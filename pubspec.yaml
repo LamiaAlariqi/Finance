@@ -30,9 +30,12 @@ environment:
 dependencies:
   cupertino_icons: ^1.0.8
   firebase_core: ^4.1.1
+  fl_chart: ^1.1.1
   flutter:
     sdk: flutter
   flutter_localization: ^0.3.3
+  line_chart: ^1.1.11
+  pie_chart: ^5.4.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
