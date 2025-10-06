@@ -77,7 +77,7 @@ class ReceiptsBody extends StatelessWidget {
           clientName: "مؤسسة التجربة",
           currency: "SAR",
           amount: "2500",
-          service: "دفعة أولى",
+          productnumber: "دفعة أولى",
         ),
       ],
     );

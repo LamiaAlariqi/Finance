@@ -8,7 +8,7 @@ class InvoiceCard extends StatelessWidget {
   final String clientName;
   final String currency;
   final String amount;
-  final String service;
+  final String productnumber;
   final void Function()? onPressed;
 
   const InvoiceCard({
@@ -18,7 +18,7 @@ class InvoiceCard extends StatelessWidget {
     required this.clientName,
     required this.currency,
     required this.amount,
-    required this.service,
+    required this.productnumber,
     this.onPressed,
   });
 
@@ -54,7 +54,7 @@ class InvoiceCard extends StatelessWidget {
                     "العميل: $clientName",
                     style: TextStyle(fontSize: fSize * 0.7),
                   ),
-                  Text(service, style: TextStyle(fontSize: fSize * 0.7)),
+                  Text(productnumber, style: TextStyle(fontSize: fSize * 0.7)),
                   SizedBox(height: hScreen * 0.01),
                   Container(
                     height: hScreen * 0.048,

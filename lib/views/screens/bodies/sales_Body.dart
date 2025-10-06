@@ -1,3 +1,5 @@
+import 'package:finance/data/models/invoice_data.dart';
+import 'package:finance/data/services/invoice_service.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
 import 'package:finance/views/widget/custom/customButton.dart';
@@ -15,7 +17,7 @@ class SalesBody extends StatefulWidget {
 }
 
 class _SalesBodyState extends State<SalesBody> {
-  String? _selectedMonth; // متغير لتخزين الشهر المحدد
+  String? _selectedMonth; 
   List<String> months = [
     "يناير",
     "فبراير",
@@ -46,6 +48,9 @@ class _SalesBodyState extends State<SalesBody> {
     "نوفمبر": "November",
     "ديسمبر": "December"
   };
+
+  int _totalInvoices = 0; 
+  List<InvoiceData> _invoices = [];
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +108,6 @@ class _SalesBodyState extends State<SalesBody> {
             value: _selectedMonth,
             items: months.map((String month) {
               return DropdownMenuItem<String>(
-                
                 value: month,
                 child: Text(month),
               );
@@ -115,9 +119,7 @@ class _SalesBodyState extends State<SalesBody> {
 
               String? englishMonth = monthMap[newValue];
               if (englishMonth != null) {
-                // هنا يمكنك إضافة كود لتحميل الفواتير وفقًا للشهر المحدد
-                // مثال:
-                // fetchInvoicesForMonth(englishMonth);
+                fetchInvoices(englishMonth); // استدعاء الدالة لجلب الفواتير
               }
             },
             decoration: InputDecoration(
@@ -125,14 +127,14 @@ class _SalesBodyState extends State<SalesBody> {
               filled: true,
               fillColor: Colors.white,
             ),
-             dropdownColor: MyColors.Cardcolor,
+            dropdownColor: MyColors.Cardcolor,
           ),
         ),
 
         SizedBox(height: hScreen * 0.03),
 
         CustomText(
-          text: "اجمالي الفواتير",
+          text: "اجمالي الفواتير: $_totalInvoices",
           fontSize: fSize * 0.8,
           fontWeight: FontWeight.normal,
           color: MyColors.appTextColorPrimary,
@@ -143,19 +145,28 @@ class _SalesBodyState extends State<SalesBody> {
             color: Colors.blue[100],
             icon: Icons.description,
             label: 'فاتورة',
-            value: '0', 
+            value: _totalInvoices.toString(),
           ),
         ),
         
-        InvoiceCard(
-          invoiceNumber: "INV-001",
-          date: "02-10-2025",
-          clientName: "شركة المثال",
-          currency: "SAR",
-          amount: "1500",
-          service: "خدمة تصميم",
-        ),
+        // عرض الفواتير بناءً على الشهر المحدد
+        ..._invoices.map((invoice) => InvoiceCard(
+          invoiceNumber: invoice.invoiceNumber,
+          date: invoice.date,
+          clientName: invoice.clientName,
+          currency: invoice.currency,
+          amount: invoice.amount,
+          productnumber: invoice.productNumber,
+        )).toList(),
       ],
     );
+  }
+
+  Future<void> fetchInvoices(String month) async {
+    InvoiceService invoiceService = InvoiceService();
+    _invoices = await invoiceService.fetchInvoicesForMonth(month, 2025);
+    setState(() {
+      _totalInvoices = _invoices.length;
+    });
   }
 }
