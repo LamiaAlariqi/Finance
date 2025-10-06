@@ -17,26 +17,18 @@ class InvoiceDialog extends StatefulWidget {
 }
 
 class _InvoiceDialogState extends State<InvoiceDialog> {
-  final TextEditingController _invoiceNumberController =
-      TextEditingController();
+  final TextEditingController _invoiceNumberController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _totalAmountController = TextEditingController(
-    text: '0.00',
-  );
-  final TextEditingController _productNumberController =
-      TextEditingController();
+  final TextEditingController _productNumberController = TextEditingController();
   final TextEditingController _clientNameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(
-    text: '1',
-  );
-  final TextEditingController _commissionController = TextEditingController(
-    text: '0.00',
-  ); // قيمة مبدئية
+  final TextEditingController _quantityController = TextEditingController(text: '1');
+  final TextEditingController _commissionController = TextEditingController(text: '0.00');
   final TextEditingController _notesController = TextEditingController();
 
   String _selectedCurrency = 'USD';
   String _selectedCategory = 'الإلكترونيات';
+  bool _includeCommission = false;
 
   final List<String> _categories = [
     'الألعاب ومتعلقات الأطفال',
@@ -61,107 +53,92 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
   void initState() {
     super.initState();
     _dateController.text = _formatDate(DateTime.now());
-    _priceController.addListener(_updateCommission);
-    _priceController.addListener(_updateCalculations);
-    _quantityController.addListener(_updateCalculations);
     _fetchInvoiceNumber();
+
+    /// حساب العمولة تلقائيًا عند تغيير السعر أو الكمية
+    _priceController.addListener(_updateCommission);
+    _quantityController.addListener(_updateCommission);
   }
 
   Future<void> _fetchInvoiceNumber() async {
     final cubit = context.read<InvoiceCubit>();
     final newNumber = await cubit.generateInvoiceNumber();
-    if (mounted) {
-      _invoiceNumberController.text = newNumber;
-    }
+    if (mounted) _invoiceNumberController.text = newNumber;
   }
 
-  void _updateCalculations() {
-    final price = double.tryParse(_priceController.text) ?? 0;
-    final quantity = double.tryParse(_quantityController.text) ?? 0;
-
-    // 1. حساب الإجمالي
-    final totalAmount = price * quantity;
-
-    // 2. حساب العمولة
-    final commission = totalAmount * 0.10;
-
-    if (mounted) {
-      setState(() {
-        // تعبئة حقل الإجمالي
-        _totalAmountController.text = totalAmount.toStringAsFixed(2);
-        // تعبئة حقل العمولة
-        _commissionController.text = commission.toStringAsFixed(2);
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _priceController.removeListener(_updateCommission);
-    _quantityController.removeListener(_updateCommission);
-    _invoiceNumberController.dispose();
-    _dateController.dispose();
-    _clientNameController.dispose();
-    _priceController.dispose();
-    _quantityController.dispose();
-    _commissionController.dispose();
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  // تنسيق التاريخ
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
   }
 
-  // حساب العمولة مؤقتًا
+  /// تحديث العمولة تلقائيًا
   void _updateCommission() {
+    final cubit = context.read<InvoiceCubit>();
     final price = double.tryParse(_priceController.text) ?? 0;
     final quantity = double.tryParse(_quantityController.text) ?? 0;
-    final commission = price * quantity * 0.10;
 
-    if (mounted) {
+    if (_includeCommission) {
+      final commission = cubit.calculateCommission(price, quantity);
       setState(() {
         _commissionController.text = commission.toStringAsFixed(2);
+      });
+    } else {
+      setState(() {
+        _commissionController.text = '0.00';
       });
     }
   }
 
-  void _saveInvoice({bool printAfterSave = false}) {
+  void _saveInvoice({bool printAfterSave = false}) async {
     if (_clientNameController.text.isEmpty ||
         _priceController.text.isEmpty ||
         _quantityController.text.isEmpty) {
       return;
     }
 
+    final cubit = context.read<InvoiceCubit>();
     final price = double.tryParse(_priceController.text) ?? 0;
     final quantity = double.tryParse(_quantityController.text) ?? 0;
 
-    context.read<InvoiceCubit>().addInvoice(
-      clientName: _clientNameController.text,
-      category: _selectedCategory,
-      price: price,
-      quantity: quantity,
-      currency: _selectedCurrency,
-      notes: _notesController.text,
-      date: _dateController.text,
-      productNumber: _productNumberController.text,
-    ).then((_) {
-      if (printAfterSave) {
-        printInvoice(
-          invoiceNumber: _invoiceNumberController.text,
-          date: _dateController.text,
-          clientName: _clientNameController.text,
-          category: _selectedCategory,
-          currency: _selectedCurrency,
-          price: _priceController.text,
-          quantity: _quantityController.text,
-          commission: _commissionController.text,
-          notes: _notesController.text,
-          productNumber: _productNumberController.text,
-        );
-      }
-    });
+    if (_includeCommission) {
+      await cubit.addInvoice(
+        clientName: _clientNameController.text,
+        category: _selectedCategory,
+        price: price,
+        quantity: quantity,
+        currency: _selectedCurrency,
+        notes: _notesController.text,
+        date: _dateController.text,
+        productNumber: _productNumberController.text,
+      );
+    } else {
+      final received = cubit.calculateTotal(price, quantity);
+      await cubit.addInvoiceWithoutCommission(
+        clientName: _clientNameController.text,
+        category: _selectedCategory,
+        price: price,
+        quantity: quantity,
+        currency: _selectedCurrency,
+        notes: _notesController.text,
+        date: _dateController.text,
+        productNumber: _productNumberController.text,
+        receivedAmount: received,
+      );
+    }
+
+    if (printAfterSave) {
+      printInvoice(
+        invoiceNumber: _invoiceNumberController.text,
+        date: _dateController.text,
+        clientName: _clientNameController.text,
+        category: _selectedCategory,
+        currency: _selectedCurrency,
+        price: _priceController.text,
+        quantity: _quantityController.text,
+        commission: _commissionController.text,
+        notes: _notesController.text,
+        productNumber: _productNumberController.text,
+      );
+    }
   }
 
   @override
@@ -169,25 +146,17 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Container(
           width: wScreen * 0.8,
           padding: EdgeInsets.all(hScreen * 0.02),
-
           color: MyColors.Cardcolor,
           child: BlocConsumer<InvoiceCubit, InvoiceState>(
             listener: (context, state) {
-              if (state is InvoiceSuccess) {
-                Navigator.of(context).pop();
-              } else if (state is InvoiceError) {
-                print("Error: ${state.message}");
-              }
+              if (state is InvoiceSuccess) Navigator.of(context).pop();
             },
             builder: (context, state) {
               final isLoading = state is InvoiceLoading;
-
               return SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,13 +164,11 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'إضافة فاتورة جديدة',
-                          style: TextStyle(
-                            fontSize: fSize * 0.9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text('إضافة فاتورة جديدة',
+                            style: TextStyle(
+                              fontSize: fSize * 0.9,
+                              fontWeight: FontWeight.bold,
+                            )),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.of(context).pop(),
@@ -210,161 +177,168 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                     ),
                     SizedBox(height: hScreen * 0.02),
 
+                    /// رقم الفاتورة
                     CustomTextFormField(
                       hintText: "رقم الفاتورة",
                       suffixIcon: Icons.numbers,
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                       controller: _invoiceNumberController,
                       readOnly: true,
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                      suffixIconColor: Colors.grey,
+                       obscureText: false, 
+                       keyboardType:TextInputType.numberWithOptions(),
                     ),
                     SizedBox(height: hScreen * 0.02),
 
-                    // التاريخ
+                    /// التاريخ
                     CustomTextFormField(
                       hintText: "التاريخ",
                       suffixIcon: Icons.calendar_today,
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                       controller: _dateController,
                       readOnly: true,
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                      suffixIconColor: Colors.grey,
+                       obscureText: false, 
+                       keyboardType:TextInputType.datetime,
                     ),
                     SizedBox(height: hScreen * 0.02),
 
-                    // العميل
+                    /// العميل
                     CustomTextFormField(
                       hintText: "اسم العميل",
                       suffixIcon: Icons.person,
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                       controller: _clientNameController,
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                      suffixIconColor: Colors.grey,
+                       obscureText: false, 
+                       keyboardType:TextInputType.text,
                     ),
                     SizedBox(height: hScreen * 0.02),
+
+                    /// المنتج
                     CustomTextFormField(
                       hintText: "رقم المنتج",
                       suffixIcon: Icons.qr_code,
-                      obscureText: false,
                       keyboardType: TextInputType.number,
                       controller: _productNumberController,
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                      suffixIconColor: Colors.grey,
+                       obscureText: false, 
                     ),
                     SizedBox(height: hScreen * 0.02),
-                    // الفئة
-                    _buildCategoryDropdown(),
+
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _includeCommission,
+                          onChanged: (v) {
+                            setState(() {
+                              _includeCommission = v!;
+                            });
+                            _updateCommission();
+                          },
+                        ),
+                        const Text("مع العمولة"),
+                      ],
+                    ),
                     SizedBox(height: hScreen * 0.02),
 
-                    // العملة
+                    _buildCategoryDropdown(),
+                    SizedBox(height: hScreen * 0.02),
                     _buildCurrencyDropdown(),
                     SizedBox(height: hScreen * 0.02),
+
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: CustomTextFormField(
                             hintText: "السعر",
+                            width: 0.5,
                             suffixIcon: Icons.monetization_on,
-                            obscureText: false,
                             keyboardType: TextInputType.number,
                             controller: _priceController,
                             enabledBorderColor: MyColors.kmainColor,
                             focusedBorderColor: MyColors.kmainColor,
-                            width: 0.5,
+                             obscureText: false, 
+                     
                           ),
                         ),
                         SizedBox(width: hScreen * 0.01),
                         Expanded(
                           child: CustomTextFormField(
                             hintText: "الكمية",
+                            width: 0.5,
                             suffixIcon: Icons.numbers,
-                            obscureText: false,
                             keyboardType: TextInputType.number,
                             controller: _quantityController,
                             enabledBorderColor: MyColors.kmainColor,
                             focusedBorderColor: MyColors.kmainColor,
-                            width: 0.5,
+                             obscureText: false, 
+                    
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: hScreen * 0.02,
-                    ), // مسافة بعد صف السعر والكمية
                     SizedBox(height: hScreen * 0.02),
 
-                    // العمولة (للعرض فقط)
-                    CustomTextFormField(
-                      hintText: "العمولة (10%)",
-                      suffixIcon: Icons.percent,
-                      obscureText: false,
-                      keyboardType: TextInputType.number,
-                      controller: _commissionController,
-                      readOnly: true,
-                      width: 0.5,
-                      enabledBorderColor: MyColors.kmainColor,
-                      focusedBorderColor: MyColors.kmainColor,
-                    ),
+                    if (_includeCommission)
+                      CustomTextFormField(
+                        hintText: "العمولة (10%)",
+                        suffixIcon: Icons.percent,
+                        controller: _commissionController,
+                        readOnly: true,
+                        width: 0.5,
+                        enabledBorderColor: MyColors.kmainColor,
+                        focusedBorderColor: MyColors.kmainColor,
+                       obscureText: false, 
+                       keyboardType:TextInputType.number,
+                      ),
+
                     SizedBox(height: hScreen * 0.02),
 
-                    // ملاحظات
                     CustomTextFormField(
                       hintText: "ملاحظات (اختياري)",
                       suffixIcon: Icons.note,
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                       controller: _notesController,
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
+                       obscureText: false, 
+                       keyboardType:TextInputType.text,
                     ),
+
                     SizedBox(height: hScreen * 0.03),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                       children: [
                         isLoading
-                            ? const Center(child: CircularProgressIndicator())
+                            ? const CircularProgressIndicator()
                             : CustomMaterialButton(
                                 title: "حفظ",
-                                vertical: hScreen * 0.01,
                                 buttonColor: MyColors.kmainColor,
                                 textColor: Colors.white,
-                                borderWidth: 0.5,
-                                borderColor: MyColors.kmainColor,
-                                height: hScreen * 0.05,
-                                width: wScreen * 0.25,
-                                textsize: fSize * 0.9,
                                 onPressed: _saveInvoice,
+                                height: hScreen * 0.05,
+                              borderColor: MyColors.kmainColor,
+                                borderWidth: 0.5,
+                                vertical: hScreen * 0.01,
+                                width: wScreen * 0.25, 
                               ),
-                        SizedBox(height: hScreen * 0.02),
                         CustomMaterialButton(
                           title: "طباعة",
-                          vertical: hScreen * 0.01,
                           buttonColor: MyColors.kmainColor,
                           textColor: Colors.white,
-                          borderWidth: 0.5,
-                          borderColor: MyColors.kmainColor,
+                          onPressed: () => _saveInvoice(printAfterSave: true),
                           height: hScreen * 0.05,
-                          width: wScreen * 0.25,
-                          textsize: fSize * 0.9,
-                          onPressed: () {
-                           _saveInvoice(printAfterSave: true);
-                          },
+                          width: wScreen * 0.25, 
+                        borderColor: MyColors.kmainColor,
+                        borderWidth: 0.5,
+                        vertical: hScreen * 0.01,
                         ),
                       ],
                     ),
