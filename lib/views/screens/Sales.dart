@@ -12,7 +12,7 @@ class Sales extends StatelessWidget {
         appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.07), child: const AppBarBody(text: "المبيعات")),
      body:Padding(
     padding:EdgeInsets.all(hScreen*0.01),
-      child: Salesbody(),
+      child: SalesBody(),
      ) );
   }
 }

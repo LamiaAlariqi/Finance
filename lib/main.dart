@@ -1,3 +1,4 @@
+import 'package:finance/cubits/invoice_cubit/invoice_cubit.dart';
 import 'package:finance/cubits/login_cubit/login_cubit.dart';
 import 'package:finance/firebase_options.dart';
 import 'package:finance/helper/HiveUser.dart';
@@ -26,8 +27,11 @@ Future<void> main() async {
   final isLoggedIn = currentUser != null && firebaseUser != null;
 
   runApp(
-    BlocProvider(
-      create: (context) => LoginCubit(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => LoginCubit()),
+        BlocProvider(create: (context) => InvoiceCubit()),
+      ],
       child: FinanceApp(isLoggedIn: isLoggedIn),
     ),
   );

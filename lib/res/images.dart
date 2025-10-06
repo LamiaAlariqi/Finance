@@ -1,4 +1,4 @@
 class MyImages {
   static const String shaqadef=
-      "assets/shaqadef.png";
+      "assets/images/shaqadef.png";
 }

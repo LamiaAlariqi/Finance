@@ -3,7 +3,7 @@ import 'package:finance/res/sizes.dart';
 import 'package:finance/views/widget/custom/customButton.dart';
 import 'package:finance/views/widget/custom/custom_text.dart';
 import 'package:finance/views/widget/invoiceCard.dart';
-import 'package:finance/views/widget/receipt_dialog.dart';
+import 'package:finance/views/dialogs/receipt_dialog.dart';
 import 'package:finance/views/widget/summarybox.dart';
 import 'package:flutter/material.dart';
 
