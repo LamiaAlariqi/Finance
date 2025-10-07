@@ -1,5 +1,6 @@
 import 'package:finance/data/models/receipts_data.dart';
 import 'package:finance/data/services/receipts_services.dart';
+import 'package:finance/views/widget/currency_drop_down.dart';
 import 'package:flutter/material.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
@@ -22,7 +23,7 @@ class _ReceiptsBodyState extends State<ReceiptsBody> {
  int? _selectedYear; 
   
  late final List<int> _years;
-
+ String? _selectedCurrency; 
  
  late Stream<List<ReceiptData>> _receiptsStream;
 
@@ -69,22 +70,24 @@ class _ReceiptsBodyState extends State<ReceiptsBody> {
   final currentMonthArabic = months[now.month - 1];
   _selectedMonth = currentMonthArabic;
     _selectedYear = currentYear;
+     _selectedCurrency = 'SAR';
 
   _receiptsStream = Stream.value([]); 
     _updateReceiptsStream();
  }
-
+ 
   void _updateReceiptsStream() {
     final monthArabic = _selectedMonth;
     final selectedYear = _selectedYear;
 
-    if (monthArabic != null && selectedYear != null) {
+    if (monthArabic != null && selectedYear != null && _selectedCurrency != null) {
       final englishMonth = monthMap[monthArabic];
       if (englishMonth != null) {
         setState(() {
           _receiptsStream = _receiptService.fetchAllReceiptsForMonth(
             englishMonth,
             selectedYear, 
+            _selectedCurrency!
           );
         });
       }
@@ -203,7 +206,22 @@ class _ReceiptsBodyState extends State<ReceiptsBody> {
             ],
           ),
     ),
-
+    
+   SizedBox(height: hScreen * 0.03),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: hScreen * 0.02),
+          child: CurrencyDropdown(
+            selectedCurrency: _selectedCurrency ?? 'SAR',
+            onCurrencyChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedCurrency = newValue;
+                });
+                _updateReceiptsStream();
+              }
+            },
+          ),
+        ),
     SizedBox(height: hScreen * 0.03),
 
     StreamBuilder<List<ReceiptData>>(

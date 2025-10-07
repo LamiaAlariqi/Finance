@@ -12,7 +12,8 @@ class Expenses extends StatelessWidget {
         appBar:PreferredSize(preferredSize:Size.fromHeight(hScreen* 0.07), child: const AppBarBody(text: "المصروفات")),
      body:Padding(
       padding: const EdgeInsets.all(16.0),
-      child:  ExpensesBody(),
+      child:  
+      ExpensesBody(),
     ));
   }
 }

@@ -7,7 +7,6 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// توليد رقم الفاتورة الجديد
   Future<String> generateInvoiceNumber() async {
     final invoices = await _firestore
         .collection('invoices')
@@ -28,7 +27,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     }
   }
 
-  /// 🔹 دوال الحساب (تُستخدم داخل الكيوبت أو من الواجهة مباشرة)
+
   double calculateTotal(double price, double quantity) {
     return price * quantity;
   }

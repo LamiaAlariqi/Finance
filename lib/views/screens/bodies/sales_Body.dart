@@ -2,6 +2,7 @@ import 'package:finance/data/models/invoice_data.dart';
 import 'package:finance/data/services/invoice_service.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
+import 'package:finance/views/widget/currency_drop_down.dart';
 import 'package:finance/views/widget/custom/customButton.dart';
 import 'package:finance/views/widget/custom/custom_text.dart';
 import 'package:finance/views/widget/invoiceCard.dart';
@@ -18,9 +19,9 @@ class SalesBody extends StatefulWidget {
 }
 
 class _SalesBodyState extends State<SalesBody> {
-  // متغيرات الحالة (State) للفلترة والـ Stream
+  
   String? _selectedMonth;
-  // **جديد:** متغير للسنة المختارة
+  String? _selectedCurrency; 
   int? _selectedYear; 
   
   late Stream<List<InvoiceData>> _invoicesStream;
@@ -46,39 +47,38 @@ class _SalesBodyState extends State<SalesBody> {
     super.initState();
     final now = DateTime.now();
     final currentYear = now.year;
-    
-    // إعداد قائمة السنوات (آخر 5 سنوات حتى السنة الحالية)
-    // List.generate(5, (index) => currentYear - index)
+  
     _years = List.generate(5, (index) => currentYear - index);
-    
-    // تعيين الشهر والسنة الحاليين كقيمة افتراضية
+  
     final currentMonthArabic = months[now.month - 1];
     _selectedMonth = currentMonthArabic;
     _selectedYear = currentYear;
+     _selectedCurrency = 'SAR';
     
-    // تهيئة Stream الأولي
-    _invoicesStream = Stream.value([]); // Stream فارغ مبدئياً لتجنب الخطأ
+   
+    _invoicesStream = Stream.value([]); 
     _updateInvoicesStream();
   }
-
-  // دالة موحدة لمعالجة تغيير الشهر أو السنة وتحديث الـ Stream
+ 
   void _updateInvoicesStream() {
     final monthArabic = _selectedMonth;
     final selectedYear = _selectedYear;
+    final selectedCurrency=_selectedCurrency;
 
-    if (monthArabic != null && selectedYear != null) {
+    if (monthArabic != null && selectedYear != null && selectedCurrency!=null) {
       final englishMonth = monthMap[monthArabic];
       if (englishMonth != null) {
-        // تحديث Stream لتشغيل جلب بيانات جديدة من Firestore بناءً على الشهر والسنة
+      
         setState(() {
           _invoicesStream = _invoiceService.fetchAllInvoicesForMonth(
             englishMonth,
             selectedYear,
+            selectedCurrency
           );
         });
       }
     } else {
-      // إرجاع Stream فارغ إذا لم يتم اختيار الشهر أو السنة
+    
       setState(() {
         _invoicesStream = Stream.value([]);
       });
@@ -89,9 +89,7 @@ class _SalesBodyState extends State<SalesBody> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        // =========================================================
-        // العنوان والزر
-        // =========================================================
+       
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -136,15 +134,11 @@ class _SalesBodyState extends State<SalesBody> {
         ),
 
         SizedBox(height: hScreen * 0.03),
-
-        // =========================================================
-        // قائمة الفلترة (Dropdowns - Month & Year)
-        // =========================================================
         Padding(
           padding: EdgeInsets.symmetric(horizontal: hScreen * 0.02),
           child: Row(
             children: [
-              // قائمة الشهور
+            
               Expanded(
                 child: DropdownButtonFormField<String>(
                   hint: const Text("اختر الشهر"),
@@ -194,16 +188,27 @@ class _SalesBodyState extends State<SalesBody> {
             ],
           ),
         ),
+         SizedBox(height: hScreen * 0.03),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: hScreen * 0.02),
+          child: CurrencyDropdown(
+            selectedCurrency: _selectedCurrency ?? 'SAR',
+            onCurrencyChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedCurrency = newValue;
+                });
+                _updateInvoicesStream();
+              }
+            },
+          ),
+        ),
 
         SizedBox(height: hScreen * 0.03),
-
-        // =========================================================
-        // StreamBuilder لعرض البيانات في الوقت الفعلي
-        // =========================================================
         StreamBuilder<List<InvoiceData>>(
           stream: _invoicesStream,
           builder: (context, snapshot) {
-            // حالة التحميل
+          
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: Padding(
@@ -213,7 +218,7 @@ class _SalesBodyState extends State<SalesBody> {
               );
             }
 
-            // حالة الخطأ
+          
             if (snapshot.hasError) {
               return Center(
                 child: Padding(
@@ -228,17 +233,14 @@ class _SalesBodyState extends State<SalesBody> {
               );
             }
 
-            // حالة وجود بيانات
+         
             final invoices = snapshot.data ?? [];
             final totalCount = invoices.length;
-            
-            // حساب القيمة الإجمالية (بفرض أن amount قابل للتحويل إلى double)
-            // يتم التحويل من String إلى double لتجميع المبالغ
             final totalAmount = invoices.fold<double>(
               0, (sum, item) => sum + (double.tryParse(item.amount) ?? 0));
 
 
-            // ملخص الإجمالي
+          
             final summary = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

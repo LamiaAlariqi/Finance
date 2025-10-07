@@ -1,3 +1,4 @@
+import 'package:finance/cubits/expenses_cubit/expenses_cubit.dart';
 import 'package:finance/cubits/invoice_cubit/invoice_cubit.dart';
 import 'package:finance/cubits/login_cubit/login_cubit.dart';
 import 'package:finance/cubits/receipt_cubit/receipt_cubit.dart';
@@ -33,6 +34,7 @@ Future<void> main() async {
         BlocProvider(create: (context) => LoginCubit()),
         BlocProvider(create: (context) => InvoiceCubit()),
         BlocProvider(create: (context) => ReceiptCubit()),
+        BlocProvider(create: (context)=>ExpenseCubit()),
       ],
       child: FinanceApp(isLoggedIn: isLoggedIn),
     ),

@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finance/data/models/receipts_data.dart';
 
 class ReceiptService {
-
-
   final Map<String, int> _monthToNumber = {
     "January": 1,
     "February": 2,
@@ -20,13 +18,13 @@ class ReceiptService {
   };
 
   CollectionReference<Map<String, dynamic>> get _receiptsCollection {
-    return 
-     FirebaseFirestore.instance.collection('receipts');
+    return FirebaseFirestore.instance.collection('receipts');
   }
 
   Stream<List<ReceiptData>> fetchAllReceiptsForMonth(
     String monthName,
     int year,
+    String currency
   ) {
     int monthNumber = _monthToNumber[monthName] ?? 0;
 
@@ -38,11 +36,9 @@ class ReceiptService {
     final endDate = DateTime(year, monthNumber + 1, 1);
 
     return _receiptsCollection
-        .where(
-          'createdAt',
-          isGreaterThanOrEqualTo: startDate,
-        )
+        .where('createdAt', isGreaterThanOrEqualTo: startDate)
         .where('createdAt', isLessThan: endDate)
+        .where('currency', isEqualTo: currency)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
@@ -62,5 +58,9 @@ class ReceiptService {
             );
           }).toList();
         });
+  }
+  Future<int> countAllReceipts() async {
+    final snapshot = await _receiptsCollection.get();
+    return snapshot.docs.length; 
   }
 }

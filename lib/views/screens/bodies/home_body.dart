@@ -1,3 +1,6 @@
+import 'package:finance/data/services/expenses_service.dart';
+import 'package:finance/data/services/invoice_service.dart';
+import 'package:finance/data/services/receipts_services.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/routes.dart';
 import 'package:finance/res/sizes.dart';
@@ -12,6 +15,10 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ExpenseService expenseService = ExpenseService();
+    final ReceiptService receiptService = ReceiptService();
+    final InvoiceService invoiceService = InvoiceService();
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: hScreen * 0.01),
       child: Column(
@@ -20,7 +27,7 @@ class HomeBody extends StatelessWidget {
           SizedBox(height: hScreen * 0.01),
           Center(
             child: Text(
-              'إجماليات سبتمبر ٢٠٢٥',
+              'إجماليات',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -28,23 +35,56 @@ class HomeBody extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SummaryBox(
-                color: Colors.red[100],
-                icon: Icons.attach_money,
-                label: 'مصروف',
-                value: '\$0',
+              FutureBuilder<int>(
+                future: expenseService.countAllExpenses(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('خطأ: ${snapshot.error}');
+                  }
+                  return SummaryBox(
+                    color: Colors.red[100],
+                    icon: Icons.attach_money,
+                    label: 'مصروف',
+                    value: '${snapshot.data ?? 0}',
+                  );
+                },
               ),
-              SummaryBox(
-                color: Colors.green[100],
-                icon: Icons.check,
-                label: 'سند قبض',
-                value: '0',
+              FutureBuilder<int>(
+                future: receiptService.countAllReceipts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('خطأ: ${snapshot.error}');
+                  }
+                  return SummaryBox(
+                    color: Colors.green[100],
+                    icon: Icons.check,
+                    label: 'سند قبض',
+                    value: '${snapshot.data ?? 0}',
+                  );
+                },
               ),
-              SummaryBox(
-                color: Colors.blue[100],
-                icon: Icons.description,
-                label: 'فاتورة',
-                value: '0',
+              FutureBuilder<int>(
+                future: invoiceService.countDocumentsInBothCollections(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('خطأ: ${snapshot.error}');
+                  }
+                  return SummaryBox(
+                    color: Colors.blue[100],
+                    icon: Icons.description,
+                    label: 'فاتورة',
+                    value: '${snapshot.data ?? 0}',
+                  );
+                },
               ),
             ],
           ),

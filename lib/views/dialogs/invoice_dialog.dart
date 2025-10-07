@@ -4,6 +4,7 @@ import 'package:finance/cubits/invoice_cubit/invoice_state.dart';
 import 'package:finance/functions/printInvoice.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
+import 'package:finance/views/widget/currency_drop_down.dart';
 import 'package:finance/views/widget/custom/customButton.dart';
 import 'package:finance/views/widget/custom/customTextFormField.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +18,19 @@ class InvoiceDialog extends StatefulWidget {
 }
 
 class _InvoiceDialogState extends State<InvoiceDialog> {
-  final TextEditingController _invoiceNumberController = TextEditingController();
+  final TextEditingController _invoiceNumberController =
+      TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _productNumberController = TextEditingController();
+  final TextEditingController _productNumberController =
+      TextEditingController();
   final TextEditingController _clientNameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '1');
-  final TextEditingController _commissionController = TextEditingController(text: '0.00');
+  final TextEditingController _quantityController = TextEditingController(
+    text: '1',
+  );
+  final TextEditingController _commissionController = TextEditingController(
+    text: '0.00',
+  );
   final TextEditingController _notesController = TextEditingController();
 
   String _selectedCurrency = 'USD';
@@ -164,11 +171,13 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('إضافة فاتورة جديدة',
-                            style: TextStyle(
-                              fontSize: fSize * 0.9,
-                              fontWeight: FontWeight.bold,
-                            )),
+                        Text(
+                          'إضافة فاتورة جديدة',
+                          style: TextStyle(
+                            fontSize: fSize * 0.9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.of(context).pop(),
@@ -186,8 +195,8 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
-                       keyboardType:TextInputType.numberWithOptions(),
+                      obscureText: false,
+                      keyboardType: TextInputType.numberWithOptions(),
                     ),
                     SizedBox(height: hScreen * 0.02),
 
@@ -200,8 +209,8 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
-                       keyboardType:TextInputType.datetime,
+                      obscureText: false,
+                      keyboardType: TextInputType.datetime,
                     ),
                     SizedBox(height: hScreen * 0.02),
 
@@ -213,8 +222,8 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
-                       keyboardType:TextInputType.text,
+                      obscureText: false,
+                      keyboardType: TextInputType.text,
                     ),
                     SizedBox(height: hScreen * 0.02),
 
@@ -227,7 +236,7 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
+                      obscureText: false,
                     ),
                     SizedBox(height: hScreen * 0.02),
 
@@ -249,7 +258,14 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
 
                     _buildCategoryDropdown(),
                     SizedBox(height: hScreen * 0.02),
-                    _buildCurrencyDropdown(),
+                    CurrencyDropdown(
+                      selectedCurrency: _selectedCurrency,
+                      onCurrencyChanged: (newValue) {
+                        setState(() {
+                          _selectedCurrency = newValue!;
+                        });
+                      },
+                    ),
                     SizedBox(height: hScreen * 0.02),
 
                     Row(
@@ -263,8 +279,7 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                             controller: _priceController,
                             enabledBorderColor: MyColors.kmainColor,
                             focusedBorderColor: MyColors.kmainColor,
-                             obscureText: false, 
-                     
+                            obscureText: false,
                           ),
                         ),
                         SizedBox(width: hScreen * 0.01),
@@ -277,8 +292,7 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                             controller: _quantityController,
                             enabledBorderColor: MyColors.kmainColor,
                             focusedBorderColor: MyColors.kmainColor,
-                             obscureText: false, 
-                    
+                            obscureText: false,
                           ),
                         ),
                       ],
@@ -294,8 +308,8 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                         width: 0.5,
                         enabledBorderColor: MyColors.kmainColor,
                         focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
-                       keyboardType:TextInputType.number,
+                        obscureText: false,
+                        keyboardType: TextInputType.number,
                       ),
 
                     SizedBox(height: hScreen * 0.02),
@@ -307,8 +321,8 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                       width: 0.5,
                       enabledBorderColor: MyColors.kmainColor,
                       focusedBorderColor: MyColors.kmainColor,
-                       obscureText: false, 
-                       keyboardType:TextInputType.text,
+                      obscureText: false,
+                      keyboardType: TextInputType.text,
                     ),
 
                     SizedBox(height: hScreen * 0.03),
@@ -324,10 +338,10 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                                 textColor: Colors.white,
                                 onPressed: _saveInvoice,
                                 height: hScreen * 0.05,
-                              borderColor: MyColors.kmainColor,
+                                borderColor: MyColors.kmainColor,
                                 borderWidth: 0.5,
                                 vertical: hScreen * 0.01,
-                                width: wScreen * 0.25, 
+                                width: wScreen * 0.25,
                               ),
                         CustomMaterialButton(
                           title: "طباعة",
@@ -335,10 +349,10 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
                           textColor: Colors.white,
                           onPressed: () => _saveInvoice(printAfterSave: true),
                           height: hScreen * 0.05,
-                          width: wScreen * 0.25, 
-                        borderColor: MyColors.kmainColor,
-                        borderWidth: 0.5,
-                        vertical: hScreen * 0.01,
+                          width: wScreen * 0.25,
+                          borderColor: MyColors.kmainColor,
+                          borderWidth: 0.5,
+                          vertical: hScreen * 0.01,
                         ),
                       ],
                     ),
@@ -364,26 +378,6 @@ class _InvoiceDialogState extends State<InvoiceDialog> {
               .map((c) => DropdownMenuItem(value: c, child: Text(c)))
               .toList(),
           onChanged: (v) => setState(() => _selectedCategory = v!),
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCurrencyDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('العملة', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 5),
-        DropdownButtonFormField<String>(
-          value: _selectedCurrency,
-          items: const [
-            DropdownMenuItem(value: 'USD', child: Text('دولار أمريكي')),
-            DropdownMenuItem(value: 'YER', child: Text('ريال يمني')),
-            DropdownMenuItem(value: 'SAR', child: Text('ريال سعودي')),
-          ],
-          onChanged: (v) => setState(() => _selectedCurrency = v!),
           decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
       ],
