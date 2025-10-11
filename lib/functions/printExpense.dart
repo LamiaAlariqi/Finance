@@ -10,7 +10,7 @@ void printExpense({
   required String type,
   required double amount,
   required String currency,
-  required String description,
+  required String? description,
 }) async {
   final pdf = pw.Document();
 
@@ -20,6 +20,7 @@ void printExpense({
 
   final pdfFont = await rootBundle.load("assets/fonts/cairo-2/Cairo-Regular.ttf");
   final ttf = pw.Font.ttf(pdfFont);
+  final safeDescription = description ?? 'لا توجد ملاحظات'; 
 
   pdf.addPage(
     pw.Page(
@@ -47,7 +48,7 @@ void printExpense({
                 pw.Text('العملة: $currency', style: pw.TextStyle(font: ttf)),
                 pw.SizedBox(height: hScreen * 0.03),
                 pw.Text('الوصف:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: ttf)),
-                pw.Text(description, style: pw.TextStyle(font: ttf)),
+                 pw.Text(safeDescription, style: pw.TextStyle(font: ttf)),
                 pw.Spacer(),
                 pw.Divider(),
                 pw.Align(

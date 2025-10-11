@@ -43,7 +43,6 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     return total - commission;
   }
 
-  /// 🔹 إضافة فاتورة مع العمولة
   Future<void> addInvoice({
     required String clientName,
     required String productNumber,

@@ -7,7 +7,9 @@ class ExpenseData {
   final String notes;
   final String date;
   final DateTime createdAt; 
+  final String? description;
   ExpenseData({
+    this.description,
     required this.type,
     required this.amount,
     required this.currency,
@@ -25,6 +27,7 @@ class ExpenseData {
       notes: data['notes'],
       date: data['date'],
       createdAt: (data['createdAt'] as Timestamp).toDate(), 
+      description: data['notes']
     );
   }
 }

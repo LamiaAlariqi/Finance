@@ -39,6 +39,7 @@ class ReceiptService {
         .where('createdAt', isGreaterThanOrEqualTo: startDate)
         .where('createdAt', isLessThan: endDate)
         .where('currency', isEqualTo: currency)
+        .orderBy('createdAt',descending: true)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
@@ -50,6 +51,7 @@ class ReceiptService {
 
             return ReceiptData(
               receiptNumber: receiptNumber,
+              notes:data['notes'] ,
               date: dateString,
               clientName: data['clientName'] ?? '',
               currency: data['currency'] ?? '',

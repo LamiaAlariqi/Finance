@@ -209,10 +209,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                             selectedCurrency: _selectedCurrency,
                             onCurrencyChanged: (newValue) {
                               setState(() {
-                                _selectedCurrency =
-                                    newValue!; 
-
-                                  
+                                _selectedCurrency = newValue!;
                               });
                             },
                           ),
@@ -251,7 +248,6 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                     ),
                     SizedBox(height: hScreen * 0.02),
 
-                    // ===== ملاحظات =====
                     CustomTextFormField(
                       hintText: "ملاحظات (اختياري)",
                       suffixIcon: Icons.note,
@@ -275,7 +271,7 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                                 title: "حفظ",
                                 buttonColor: MyColors.kmainColor,
                                 textColor: Colors.white,
-                                onPressed: _saveReceipt, // حفظ فقط
+                                onPressed: _saveReceipt,
                                 height: hScreen * 0.05,
                                 width: wScreen * 0.25,
                                 borderColor: MyColors.kmainColor,
@@ -284,7 +280,6 @@ class _ReceiptDialogState extends State<ReceiptDialog> {
                                 textsize: fSize * 0.9,
                               ),
 
-                        // زر الطباعة (حفظ وطباعة)
                         CustomMaterialButton(
                           title: "حفظ وطباعة",
                           buttonColor: MyColors.kmainColor,

@@ -68,7 +68,6 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
       date: _dateController.text,
     );
 
-    // إظهار Snackbar بعد الحفظ
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('تم حفظ المصروف بنجاح!'),
@@ -89,6 +88,7 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
     setState(() {
       _isLoading = false; // إلغاء تفعيل حالة التحميل
     });
+    Navigator.of(context).pop();
   }
 
   @override
@@ -222,7 +222,7 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
                               textsize: fSize * 0.9,
                               onPressed: () => _saveExpense(),
                             ),
-                      _isLoading 
+                      _isLoading
                           ? SizedBox()
                           : CustomMaterialButton(
                               title: "طباعة",
@@ -234,7 +234,8 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
                               height: hScreen * 0.05,
                               width: wScreen * 0.25,
                               textsize: fSize * 0.9,
-                              onPressed: () => _saveExpense(printAfterSave: true),
+                              onPressed: () =>
+                                  _saveExpense(printAfterSave: true),
                             ),
                     ],
                   ),

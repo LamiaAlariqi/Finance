@@ -1,9 +1,11 @@
+import 'package:finance/cubits/reports_cubit/report_cubit.dart';
+import 'package:finance/cubits/reports_cubit/report_state.dart';
+import 'package:finance/views/widget/bar_chart_card.dart';
+import 'package:finance/views/widget/reports_filter.dart';
+import 'package:finance/views/widget/summary_boxes_grid.dart';
 import 'package:flutter/material.dart';
-import 'package:finance/res/color_app.dart';
-import 'package:finance/res/sizes.dart';
-import 'package:finance/views/widget/custom/custom_text.dart';
-import 'package:finance/views/widget/summarybox.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:finance/res/sizes.dart'; 
 
 class ReportsBody extends StatefulWidget {
   const ReportsBody({super.key});
@@ -13,232 +15,111 @@ class ReportsBody extends StatefulWidget {
 }
 
 class _ReportsBodyState extends State<ReportsBody> {
-  String _selectedCurrency = "ريال سعودي";
-  String _selectedDateFilter = "هذا الشهر";
+  String _selectedCurrency = "YER";
+  String? _selectedMonth;
+  int? _selectedYear;
+  String _reportType = "شهري";
 
-  final List<String> _currencies = ["ريال سعودي", "ريال يمني", "دولار"];
-  final List<String> _dateFilters = ["اليوم", "هذا الأسبوع", "هذا الشهر", "هذه السنة"];
+  final List<String> _currencies = ["YER", "USD", "SAR"];
+  final List<String> _months = [
+    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+  ];
+  final List<int> _years =
+      List.generate(5, (index) => DateTime.now().year - index);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMonth = _months[DateTime.now().month - 1];
+    _selectedYear = DateTime.now().year;
+  }
+
+  // دالة مساعدة لجلب البيانات (لتجنب التكرار في onChanged)
+  void _fetchReports(ReportsCubit cubit) {
+    if (_reportType == "شهري" && _selectedMonth != null) {
+      cubit.fetchMonthlyReports(_selectedMonth!, _selectedCurrency);
+    } else if (_reportType == "سنوي" && _selectedYear != null) {
+      cubit.fetchAnnualReports(_selectedCurrency, year: _selectedYear);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ReportsCubit(),
+      child: BlocBuilder<ReportsCubit, ReportsState>(
+        builder: (context, state) {
+          if (state is ReportsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return _buildReportContent(context, state);
+        },
+      ),
+    );
+  }
+
+  Widget _buildReportContent(BuildContext context, ReportsState state) {
+    final cubit = BlocProvider.of<ReportsCubit>(context);
+
+    if (state is ReportsInitial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchReports(cubit);
+      });
+    }
+
+    final isLoaded = state is ReportsLoaded;
+    final ReportsLoaded? loadedState = isLoaded ? state as ReportsLoaded : null;
+
     return ListView(
       padding: EdgeInsets.all(hScreen * 0.02),
       children: [
-        // ===== العنوان =====
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  text: "التقارير",
-                  fontSize: fSize * 0.9,
-                  fontWeight: FontWeight.bold,
-                  color: MyColors.appTextColorPrimary,
-                ),
-                CustomText(
-                  text: "تقارير مالية شاملة",
-                  fontSize: fSize * 0.8,
-                  fontWeight: FontWeight.normal,
-                  color: MyColors.appTextColorPrimary,
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                // فلترة التاريخ
-                DropdownButton<String>(
-                  value: _selectedDateFilter,
-                  items: _dateFilters.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, style: TextStyle(fontSize: fSize * 0.8)),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedDateFilter = newValue!;
-                    });
-                  },
-                ),
-                SizedBox(width: wScreen * 0.02),
-                // فلترة العملات
-                DropdownButton<String>(
-                  value: _selectedCurrency,
-                  items: _currencies.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, style: TextStyle(fontSize: fSize * 0.8)),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedCurrency = newValue!;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ],
+        ReportFilters(
+          reportType: _reportType,
+          selectedMonth: _selectedMonth,
+          selectedYear: _selectedYear,
+          selectedCurrency: _selectedCurrency,
+          currencies: _currencies,
+          months: _months,
+          years: _years,
+          onReportTypeChanged: (newValue) {
+            setState(() {
+              _reportType = newValue;
+              _fetchReports(cubit);
+            });
+          },
+          onMonthChanged: (newValue) {
+            setState(() {
+              _selectedMonth = newValue;
+              _fetchReports(cubit);
+            });
+          },
+          onYearChanged: (newValue) {
+            setState(() {
+              _selectedYear = newValue;
+              _fetchReports(cubit);
+            });
+          },
+          onCurrencyChanged: (newValue) {
+            setState(() {
+              _selectedCurrency = newValue;
+              _fetchReports(cubit);
+            });
+          },
         ),
-
         SizedBox(height: hScreen * 0.03),
 
-        // ===== Summary Boxes 
-        Row(
-          children: [
-            Expanded(
-              child: SummaryBox(
-                color: Colors.green[100],
-                icon: Icons.shopping_cart,
-                label: 'إجمالي المبيعات',
-                value: '0',
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: SummaryBox(
-                color: Colors.red[100],
-                icon: Icons.money_off,
-                label: 'إجمالي المصروفات',
-                value: '0',
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: hScreen*0.015),
-        Row(
-          children: [
-            Expanded(
-              child: SummaryBox(
-                color: Colors.blue[100],
-                icon: Icons.receipt,
-                label: 'إجمالي السندات',
-                value: '0',
-              ),
-            ),
-            SizedBox(width: hScreen*0.015),
-            Expanded(
-              child: SummaryBox(
-                color: Colors.purple[100],
-                icon: Icons.show_chart,
-                label: 'صافي الربح',
-                value: '0',
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: hScreen * 0.04),
-
-        // ===== مخطط المقارنة =====
-        Card(
-          color: Colors.grey[100], 
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: EdgeInsets.all(hScreen * 0.02),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("مقارنة المبيعات والمصروفات", style: TextStyle(fontSize: fSize * 0.9, fontWeight: FontWeight.bold)),
-                SizedBox(height: hScreen * 0.02),
-
-              
-                Row(
-                  children: const [
-                    _LegendItem(color: Colors.blue, text: "الربح"),
-                    SizedBox(width: 10),
-                    _LegendItem(color: Colors.red, text: "المصروفات"),
-                    SizedBox(width: 10),
-                    _LegendItem(color: Colors.green, text: "المبيعات"),
-                  ],
-                ),
-                SizedBox(height: hScreen * 0.02),
-
-                SizedBox(
-                  height: hScreen * 0.3,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: FlGridData(show: true),
-                      titlesData: FlTitlesData(show: true),
-                      borderData: FlBorderData(show: true),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: [FlSpot(0, 3), FlSpot(1, 4), FlSpot(2, 6)],
-                          isCurved: true,
-                          color: Colors.blue, // الربح
-                          barWidth: 3,
-                        ),
-                        LineChartBarData(
-                          spots: [FlSpot(0, 2), FlSpot(1, 3), FlSpot(2, 5)],
-                          isCurved: true,
-                          color: Colors.red, // المصروفات
-                          barWidth: 3,
-                        ),
-                        LineChartBarData(
-                          spots: [FlSpot(0, 4), FlSpot(1, 6), FlSpot(2, 7)],
-                          isCurved: true,
-                          color: Colors.green, // المبيعات
-                          barWidth: 3,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        if (state is ReportsError)
+          Center(
+            child: Text('خطأ: ${(state as ReportsError).message}',
+                style: const TextStyle(color: Colors.red)),
           ),
-        ),
 
-        SizedBox(height: hScreen * 0.04),
-
-        // ===== مخطط توزيع المصروفات =====
-        Card(
-          color: Colors.grey[100], // الخلفية الرمادية
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: EdgeInsets.all(hScreen * 0.02),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("توزيع المصروفات", style: TextStyle(fontSize: fSize * 0.9, fontWeight: FontWeight.bold)),
-                SizedBox(height: hScreen * 0.02),
-                SizedBox(
-                  height: hScreen * 0.3,
-                  child: PieChart(
-                    PieChartData(
-                      sections: [
-                        PieChartSectionData(value: 40, color: Colors.orange, title: "تشغيل"),
-                        PieChartSectionData(value: 30, color: Colors.red, title: "رواتب"),
-                        PieChartSectionData(value: 20, color: Colors.green, title: "خدمات"),
-                        PieChartSectionData(value: 10, color: Colors.blue, title: "أخرى"),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ويدجت خاصة لعرض التوضيح (Legend) تحت العنوان
-class _LegendItem extends StatelessWidget {
-  final Color color;
-  final String text;
-  const _LegendItem({required this.color, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 12, height: 12, color: color),
-        SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 12)),
+        if (isLoaded) ...[
+          SummaryBoxesGrid(loadedState: loadedState!),
+          SizedBox(height: hScreen * 0.04),
+          BarChartCard(loadedState: loadedState),
+        ],
       ],
     );
   }

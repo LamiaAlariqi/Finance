@@ -1,5 +1,6 @@
 import 'package:finance/data/models/Expenses_data.dart';
 import 'package:finance/data/services/expenses_service.dart';
+import 'package:finance/functions/printExpense.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
 import 'package:finance/views/dialogs/expenses_dialog.dart';
@@ -271,6 +272,9 @@ class _ExpensesBodyState extends State<ExpensesBody> {
                   title: Text("مصروف: ${expense.type}"),
                   subtitle: Text("${expense.date} | ${expense.amount} ${expense.currency}"),
                   trailing: Text("${expense.amount}"),
+                  onTap: (){
+                    printExpense(amount:expense.amount , date: (expense.createdAt).toString(), type: expense.type, currency: expense.currency, description: expense.description);
+                  },
                 )).toList(),
               ],
             );

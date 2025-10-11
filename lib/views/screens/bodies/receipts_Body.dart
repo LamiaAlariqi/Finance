@@ -1,5 +1,6 @@
 import 'package:finance/data/models/receipts_data.dart';
 import 'package:finance/data/services/receipts_services.dart';
+import 'package:finance/functions/printReceipt.dart';
 import 'package:finance/views/widget/currency_drop_down.dart';
 import 'package:flutter/material.dart';
 import 'package:finance/res/color_app.dart';
@@ -304,13 +305,23 @@ class _ReceiptsBodyState extends State<ReceiptsBody> {
         
         ...receipts
           .map(
-           (receipt) => InvoiceCard(
-            invoiceNumber: receipt.receiptNumber,
-            date: receipt.date,
-            clientName: receipt.clientName,
-            currency: receipt.currency,
-            amount: (receipt.amount).toString(),
-            productnumber: receipt.productNumber,
+           (receipt) => GestureDetector(
+            onTap: (){
+              printReceipt(
+                receiptNumber: receipt.receiptNumber, 
+                date: receipt.date, clientName: receipt.clientName, 
+                amount: (receipt.amount).toString(), currency: receipt.currency,
+                 productNumber: receipt.productNumber, 
+                 notes: receipt.notes);
+            },
+             child: InvoiceCard(
+              invoiceNumber: receipt.receiptNumber,
+              date: receipt.date,
+              clientName: receipt.clientName,
+              currency: receipt.currency,
+              amount: (receipt.amount).toString(),
+              productnumber: receipt.productNumber,
+             ),
            ),
           )
           .toList(),

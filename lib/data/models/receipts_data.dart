@@ -3,10 +3,12 @@ class ReceiptData {
   final String date;
   final String clientName;
   final String currency;
-  final double amount; // يجب أن يكون double أو num ليتطابق مع InvoiceCard
+  final double amount;
   final String productNumber;
+  final String notes;
 
-  ReceiptData({
+  ReceiptData( {
+    required this.notes,
     required this.receiptNumber,
     required this.date,
     required this.clientName,

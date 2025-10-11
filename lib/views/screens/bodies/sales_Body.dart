@@ -1,5 +1,6 @@
 import 'package:finance/data/models/invoice_data.dart';
 import 'package:finance/data/services/invoice_service.dart';
+import 'package:finance/functions/printInvoice.dart';
 import 'package:finance/res/color_app.dart';
 import 'package:finance/res/sizes.dart';
 import 'package:finance/views/widget/currency_drop_down.dart';
@@ -285,22 +286,34 @@ class _SalesBodyState extends State<SalesBody> {
                 ],
               );
             }
-
-            // عرض الملخص وقائمة الفواتير
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 summary,
                 
-                // عرض الفواتير
                 ...invoices.map(
-                  (invoice) => InvoiceCard(
-                    invoiceNumber: invoice.invoiceNumber,
-                    date: invoice.date,
-                    clientName: invoice.clientName,
-                    currency: invoice.currency,
-                    amount: invoice.amount,
-                    productnumber: invoice.productNumber,
+                  (invoice) => GestureDetector(
+                    onTap: (){
+                      printInvoice(
+                        invoiceNumber: invoice.invoiceNumber, 
+                        date: invoice.date,
+                         clientName: invoice.clientName, 
+                         category: invoice.category, 
+                         productNumber: invoice.productNumber,
+                          currency: invoice.currency,
+                          price: (invoice.price).toString(), 
+                          quantity:(invoice.quantity).toString(),
+                           commission:(invoice.commission).toString(), 
+                           notes: invoice.notes);
+                    },
+                    child: InvoiceCard(
+                      invoiceNumber: invoice.invoiceNumber,
+                      date: invoice.date,
+                      clientName: invoice.clientName,
+                      currency: invoice.currency,
+                      amount: invoice.amount,
+                      productnumber: invoice.productNumber,
+                    ),
                   ),
                 ).toList(),
               ],

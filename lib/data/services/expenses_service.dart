@@ -21,7 +21,6 @@ class ExpenseService {
     return FirebaseFirestore.instance.collection('expenses');
   }
 
-  // تعديل الفلترة حسب العملة
   Stream<List<ExpenseData>> fetchExpensesForMonth(String monthName, int year, String currency) {
     int monthNumber = _monthToNumber[monthName] ?? 0;
 
@@ -36,6 +35,7 @@ class ExpenseService {
         .where('createdAt', isGreaterThanOrEqualTo: startDate)
         .where('createdAt', isLessThan: endDate)
         .where('currency', isEqualTo: currency)
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
@@ -44,31 +44,32 @@ class ExpenseService {
         });
   }
 
-  // تعديل الفلترة حسب العملة
-  Future<double> fetchTotalExpensesForMonth(String monthName, int year, String currency) async {
+  Stream<double> fetchTotalExpensesForMonth(String monthName, int year, String currency) {
     int monthNumber = _monthToNumber[monthName] ?? 0;
 
     if (monthNumber < 1 || monthNumber > 12) {
-      return 0;
+      return Stream.value(0);
     }
 
     final startDate = DateTime(year, monthNumber, 1);
     final endDate = DateTime(year, monthNumber + 1, 1);
 
-    final snapshot = await _expensesCollection
+    return _expensesCollection
         .where('createdAt', isGreaterThanOrEqualTo: startDate)
         .where('createdAt', isLessThan: endDate)
-        .where('currency', isEqualTo: currency) // إضافة شرط العملة
-        .get();
-
-    double total = 0;
-    for (var doc in snapshot.docs) {
-      total += (doc.data()['amount'] as num).toDouble();
-    }
-    return total;
+        .where('currency', isEqualTo: currency) 
+        .orderBy('createdAt', descending: true)
+        .snapshots() 
+        .map((snapshot) {
+          double total = 0;
+          for (var doc in snapshot.docs) {
+            total += (doc.data()['amount'] as num?)?.toDouble() ?? 0.0;
+          }
+          return total;
+        });
   }
 
-  // تعديل الفلترة حسب العملة
+
   Future<double> fetchHighestExpenseForMonth(String monthName, int year, String currency) async {
     int monthNumber = _monthToNumber[monthName] ?? 0;
 
@@ -82,13 +83,13 @@ class ExpenseService {
     final snapshot = await _expensesCollection
         .where('createdAt', isGreaterThanOrEqualTo: startDate)
         .where('createdAt', isLessThan: endDate)
-        .where('currency', isEqualTo: currency) // إضافة شرط العملة
+        .where('currency', isEqualTo: currency) 
         .orderBy('amount', descending: true)
         .limit(1)
         .get();
 
     if (snapshot.docs.isNotEmpty) {
-      return (snapshot.docs.first.data()['amount'] as num).toDouble();
+      return (snapshot.docs.first.data()['amount'] as num?)?.toDouble() ?? 0.0;
     }
     return 0;
   }
@@ -97,4 +98,4 @@ class ExpenseService {
     final snapshot = await _expensesCollection.get();
     return snapshot.docs.length; 
   }
-}
+} 
